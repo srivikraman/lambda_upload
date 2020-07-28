@@ -1,0 +1,20 @@
+{
+  "name": "package",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server",
+  "dependencies": {
+    "apollo-server": "^2.16.0",
+    "apollo-server-lambda": "^2.16.0",
+    "aws-sdk": "^2.720.0",
+    "fs": "0.0.1-security",
+    "graphql": "^15.3.0",
+    "s3-streams": "^0.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node handler.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
