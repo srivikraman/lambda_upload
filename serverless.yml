@@ -5,6 +5,10 @@ provider:
 functions:
   graphql:
     handler: handler.graphqlHandler
+    environment:
+      SAMPLE_ID: ${env:SAMPLE_ID}
+      SAMPLE_KEY: ${env:SAMPLE_KEY}
+      BUCKET: ${env:BUCKET}
     events:
     - http:
         path: graphql

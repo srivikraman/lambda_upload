@@ -1,6 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server-lambda');
 const AWS = require('aws-sdk');
-
+var fs = require("fs");
+var mime = require('mime-types');
 const s3 = new AWS.S3({
   accessKeyId: process.env.SAMPLE_ID,
   secretAccessKey: process.env.SAMPLE_KEY
@@ -31,18 +32,30 @@ const resolvers = {
         if (isValidFile(file.filename) != true) {
           throw "Not a valid file";
         }
+
+        var path = "/tmp/" + file.filename;
+       return saveFileLocally(file, path).then(function (data) {
+        const fileContent = fs.readFileSync(path);
+        console.log(mime.lookup(path));
+        var stats = fs.statSync(path)
+        var fileSizeInBytes = stats["size"]
+        console.log(fileSizeInBytes);
         const params = {
           Bucket: process.env.BUCKET,
           Key: file.filename,
-          Body: file.createReadStream(),
+          Body: fileContent,
           ContentType: file.mimetype,
           ContentEncoding: file.encoding
         };
         return uploadFileToS3(params, file);
-      });
-  }
+      }).catch(function (err) {
+      console.log("error");
+      console.log(err);
+      throw err;
+    });
+  })
 }
-};
+}};
 
 function isValidFile(filename) {
   console.log("Checking extension");
@@ -56,6 +69,17 @@ function isValidFile(filename) {
     }
   }
   return false
+}
+
+function saveFileLocally(file, path) {
+        var writeStream = fs.createWriteStream(path);
+        var readStream = file.createReadStream();
+        readStream.pipe(writeStream);
+        return new Promise(function(resolve, reject) {
+          readStream.on('end', () => {
+            resolve();
+          })
+        })
 }
 
 function uploadFileToS3(params, file) {
